@@ -11,6 +11,12 @@ namespace Editor.Build.Runner
 {
     public static class BuildRunner
     {
+        public static async void RunByEditor(BuildArgs args)
+        {
+            List<IBuildStep> steps = GetBuildSteps(args);
+            await BuildStepRunner.Run(args, steps);
+        }
+        
         [UsedImplicitly]
         public static void RunByCiCd()
         {
