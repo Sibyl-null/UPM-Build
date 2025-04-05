@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Build.Editor;
 using CommandLine;
 using Editor.Build.Steps;
@@ -23,7 +24,12 @@ namespace Editor.Build.Runner
             try
             {
                 string[] args = Environment.GetCommandLineArgs();
-                Parser.Default.ParseArguments<BuildArgs>(args)
+                int idx = Array.IndexOf(args, "--");
+                if (idx < 0)
+                    throw new Exception("Invalid command line arguments");
+                
+                string[] myArgs = args.Skip(idx + 1).ToArray();
+                Parser.Default.ParseArguments<BuildArgs>(myArgs)
                     .WithParsed(OnExecute)
                     .WithNotParsed(OnParseError);
             }
