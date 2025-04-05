@@ -37,10 +37,10 @@ namespace Editor.Build.Steps
         
         protected virtual void SetKeystore()
         {
-            PlayerSettings.Android.keystoreName = "../jenkins/keystore/ywkj.keystore";
-            PlayerSettings.Android.keystorePass = "Newstartup1";
-            PlayerSettings.Android.keyaliasName = "newstartup";
-            PlayerSettings.Android.keyaliasPass = "Newstartup1";
+            PlayerSettings.Android.keystoreName = "../CiCd/sandbox.keystore";
+            PlayerSettings.Android.keystorePass = "123456789";
+            PlayerSettings.Android.keyaliasName = "sibyl";
+            PlayerSettings.Android.keyaliasPass = "123456789";
         }
         
         /** Fix the problem of incorrect cache when the native library version is changed in Unity 2021 */
