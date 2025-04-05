@@ -24,13 +24,22 @@ namespace Editor.Build.Runner
             {
                 string[] args = Environment.GetCommandLineArgs();
                 Parser.Default.ParseArguments<BuildArgs>(args)
-                    .WithParsed(OnExecute);
+                    .WithParsed(OnExecute)
+                    .WithNotParsed(OnParseError);
             }
             catch (Exception e)
             {
                 Debug.LogException(e);
                 EditorApplication.Exit(1);
             }
+        }
+
+        private static void OnParseError(IEnumerable<Error> errors)
+        {
+            foreach (Error error in errors)
+                Debug.LogError(error.ToString());
+            
+            EditorApplication.Exit(1);
         }
 
         private static async void OnExecute(BuildArgs args)
