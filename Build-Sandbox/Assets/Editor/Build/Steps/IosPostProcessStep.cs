@@ -3,7 +3,6 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
 using Build.Editor;
-using Build.Editor.Contexts;
 using Editor.Build.Runner;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
@@ -16,7 +15,7 @@ namespace Editor.Build.Steps
     {
         public override Task Execute()
         {
-            BuildReport report = Context.Get<BuildReport>(BuiltinContextKey.BuildReport);
+            BuildReport report = Context.Get<BuildReport>(BuildContextKey.BuildReport);
             string path = report.summary.outputPath;
             
             CopyPodfile(path);
@@ -26,13 +25,10 @@ namespace Editor.Build.Steps
             EnableFirebaseDebugView(path);
 
             WriteIpaName();
-            WriteBuildInfo();
-            
-            OnCustomPostProcess();
             return Task.CompletedTask;
         }
         
-        protected virtual void CopyPodfile(string path)
+        private void CopyPodfile(string path)
         {
             if (File.Exists("Assets/Plugins/iOS/Podfile"))
             {
@@ -46,7 +42,7 @@ namespace Editor.Build.Steps
             }
         }
 
-        protected virtual void SetXcodePBXInfo(string path)
+        private void SetXcodePBXInfo(string path)
         {
             string pbxPath = path + "/Unity-iPhone.xcodeproj/project.pbxproj";
             PBXProject pbxProject = new PBXProject();
@@ -68,7 +64,7 @@ namespace Editor.Build.Steps
             pbxProject.WriteToFile(pbxPath);
         }
 
-        protected virtual void SetTransportSecurityForEnableHttp(string path)
+        private void SetTransportSecurityForEnableHttp(string path)
         {
             string plistPath = path + "/Info.plist";
             PlistDocument plistDoc = new PlistDocument();
@@ -84,7 +80,7 @@ namespace Editor.Build.Steps
             File.WriteAllText(plistPath, plistDoc.WriteToString());
         }
 
-        protected virtual void SetEntitlementsForLuid(string path)
+        private void SetEntitlementsForLuid(string path)
         {
             string pbxPath = path + "/Unity-iPhone.xcodeproj/project.pbxproj";
             string[] nameArray = PlayerSettings.applicationIdentifier.Split('.');
@@ -97,7 +93,7 @@ namespace Editor.Build.Steps
             projCapability.WriteToFile();
         }
 
-        protected virtual void EnableFirebaseDebugView(string path)
+        private void EnableFirebaseDebugView(string path)
         {
             string schemePath = path + "/Unity-iPhone.xcodeproj/xcshareddata/xcschemes/Unity-iPhone.xcscheme";
             XmlDocument schemeProject = new XmlDocument();
@@ -134,7 +130,7 @@ namespace Editor.Build.Steps
             schemeProject.Save(schemePath);
         }
 
-        protected virtual bool FirebaseDebugViewConstraint()
+        private bool FirebaseDebugViewConstraint()
         {
             return Args.IsDebug;
         }
@@ -149,20 +145,6 @@ namespace Editor.Build.Steps
             string exportPath = "../build/new";
             string ipaPath = Path.Combine(exportPath, "IpaName");
             File.WriteAllText(ipaPath, ipaName);
-        }
-
-        private void WriteBuildInfo()
-        {
-            string tag = Args.IsDebug ? "dev" : "rel";
-            string infoStr = $"{Args.Config.AppVersion} {tag}";
-            
-            string exportPath = "../build/new";
-            string infoPath = Path.Combine(exportPath, "BuildInfoTemp");
-            File.WriteAllText(infoPath, infoStr);
-        }
-        
-        protected virtual void OnCustomPostProcess()
-        {
         }
     }
 }

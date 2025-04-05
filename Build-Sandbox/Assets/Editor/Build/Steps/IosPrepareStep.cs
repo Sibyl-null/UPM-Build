@@ -1,7 +1,6 @@
 using System.IO;
 using System.Threading.Tasks;
 using Build.Editor;
-using Build.Editor.Contexts;
 using Editor.Build.Runner;
 using UnityEditor;
 
@@ -15,19 +14,18 @@ namespace Editor.Build.Steps
             SetKeystore();
             PreparePath();
 
-            OnCustomPrepare();
             AssetDatabase.SaveAssets();
             return Task.CompletedTask;
         }
 
-        protected virtual void PrepareSettings()
+        private void PrepareSettings()
         {
             PlayerSettings.bundleVersion = Args.Config.AppVersion;
             PlayerSettings.iOS.buildNumber = Args.Config.VersionCode.ToString();
             PlayerSettings.SplashScreen.showUnityLogo = false;
         }
         
-        protected virtual void SetKeystore()
+        private void SetKeystore()
         {
             PlayerSettings.iOS.appleEnableAutomaticSigning = true;
         }
@@ -49,17 +47,13 @@ namespace Editor.Build.Steps
             exportPath = Path.Combine(exportPath, exportName);
             cachePath = Path.Combine(cachePath, exportName);
             
-            Context.Set(BuiltinContextKey.ExportPath, exportPath);
-            Context.Set(BuiltinContextKey.CachePath, cachePath);
+            Context.Set(BuildContextKey.ExportPath, exportPath);
+            Context.Set(BuildContextKey.CachePath, cachePath);
         }
         
-        protected virtual string GetExportName()
+        private string GetExportName()
         {
             return "xcode-unity";
-        }
-        
-        protected virtual void OnCustomPrepare()
-        {
         }
     }
 }

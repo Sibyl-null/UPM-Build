@@ -17,7 +17,7 @@ namespace Build.Editor
         void IBuildStep.Init(BuildContext context)
         {
             Context = context;
-            Args = context.Get<TArgs>(BuiltinContextKey.BuildArgs);
+            Args = context.Get<TArgs>(BaseBuildArgs.ContextKey);
         }
 
         public abstract Task Execute();

@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Build.Editor;
-using Build.Editor.Contexts;
 using Editor.Build.Runner;
 using UnityEditor;
 
@@ -17,12 +16,11 @@ namespace Editor.Build.Steps
             CleanupBuildCacheForGradle();
             PreparePath();
 
-            OnCustomPrepare();
             AssetDatabase.SaveAssets();
             return Task.CompletedTask;
         }
 
-        protected virtual void PrepareSettings()
+        private void PrepareSettings()
         {
             PlayerSettings.bundleVersion = Args.Config.AppVersion;
             PlayerSettings.Android.bundleVersionCode = Args.Config.VersionCode;
@@ -34,8 +32,8 @@ namespace Editor.Build.Steps
             EditorUserBuildSettings.androidBuildSubtarget = MobileTextureSubtarget.ASTC;
             EditorUserBuildSettings.androidETC2Fallback = AndroidETC2Fallback.Quality32BitDownscaled;
         }
-        
-        protected virtual void SetKeystore()
+
+        private void SetKeystore()
         {
             PlayerSettings.Android.keystoreName = "../CiCd/sandbox.keystore";
             PlayerSettings.Android.keystorePass = "123456789";
@@ -74,21 +72,17 @@ namespace Editor.Build.Steps
             exportPath += extension;
             cachePath += extension;
             
-            Context.Set(BuiltinContextKey.ExportPath, exportPath);
-            Context.Set(BuiltinContextKey.CachePath, cachePath);
+            Context.Set(BuildContextKey.ExportPath, exportPath);
+            Context.Set(BuildContextKey.CachePath, cachePath);
         }
-        
-        protected virtual string GetExportName()
+
+        private string GetExportName()
         {
             string appName = PlayerSettings.productName.Replace(" ", "_").ToLower();
             string tag = Args.IsDebug ? "dev" : "rel";
             string time = DateTime.Now.ToString("MMdd_HHmm");
             string appStore = Args.AppStore.ToString().ToLower();
             return $"{appName}_{tag}_v{Args.Config.AppVersion}_r{Args.Config.VersionCode}_{time}_{appStore}";
-        }
-
-        protected virtual void OnCustomPrepare()
-        {
         }
     }
 }
