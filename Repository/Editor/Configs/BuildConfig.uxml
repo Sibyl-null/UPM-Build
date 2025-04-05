@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <ui:EnumField label="App Store" type="Build.Editor.BuildAppStore, com.learnings.unity.build.editor" name="AppStoreField" />
+    <ui:IntegerField label="Version Code" value="1" name="VersionCodeField" />
+    <ui:TextField picking-mode="Ignore" label="Version" value="0.1.0" name="VersionField" />
+    <ui:Button text="Sync ProjectSettings" parse-escape-sequences="true" display-tooltip-when-elided="true" name="SyncButton" />
+</ui:UXML>

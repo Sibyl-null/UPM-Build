@@ -1,0 +1,8 @@
+{
+  "name": "com.sibyl..build",
+  "version": "0.0.1",
+  "displayName": "Unity-Build",
+  "description": "Build package for unity",
+  "unity": "2019.1",
+  "keywords": []
+}

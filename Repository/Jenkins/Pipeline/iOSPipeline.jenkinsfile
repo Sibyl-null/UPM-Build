@@ -1,0 +1,346 @@
+@NonCPS
+def getFirChangeString() {
+    echo "Gathering SCM changes for fir"
+    def firChangeString = ""
+    def changeLogSets = currentBuild.changeSets
+    for (int i = 0; i < changeLogSets.size(); i++) {
+        def entries = changeLogSets[i].items
+        for (int j = 0; j < entries.length; j++) {
+            def entry = entries[j]
+            firChangeString += "\n - ${entry.msg} [${entry.author}]"
+        }
+    }
+
+    if (!firChangeString) {
+        firChangeString = "\n - no new changes"
+    }
+
+    return firChangeString
+}
+
+@NonCPS
+def getChangeString() {
+    echo "Gathering SCM changes"
+    def changeString = ""
+    def changeLogSets = currentBuild.changeSets
+    for (int i = 0; i < changeLogSets.size(); i++) {
+        def entries = changeLogSets[i].items
+        for (int j = 0; j < entries.length; j++) {
+            def entry = entries[j]
+            changeString += "\\n - ${entry.msg} [${entry.author}]"
+        }
+    }
+
+    if (!changeString) {
+        changeString = "\\n - no new changes"
+    }
+
+    return changeString
+}
+
+pipeline {
+
+    agent any
+
+    parameters {
+        choice(name: "appStore", choices: ["Apple"], description: "目标商店")
+        string(name: "versionCode", defaultValue: "1", description: "版本代码，默认优先使用代码配置")
+        string(name: "version", defaultValue: "0.1.0", description: "版本号，默认优先使用代码配置")
+        booleanParam(name: "isDebug", defaultValue: true, description: "是否为测试包")
+        booleanParam(name: "isReleaseConfig", defaultValue: false, description: "公共库配置是否为发布版本，配置时请只在测试包生效")
+        booleanParam(name: "unityPack", defaultValue: true, description: "是否执行 Unity 流程")
+        booleanParam(name: "repoUpdate", defaultValue: false, description: "是否更新 Pod 资源配置信息")
+        booleanParam(name: "uploadToFir", defaultValue: true, description: "是否上传至 Fir")
+        booleanParam(name: "uploadToAppStore", defaultValue: false, description: "是否上传至 App Store")
+        booleanParam(name: "uploadSymbols", defaultValue: false, description: "是否上传符号表到 Firebase, 上传至 App Store 时生效")
+        booleanParam(name: "notificationOnError", defaultValue: true, description: "打包失败是否通知打包群")
+        booleanParam(name: "onlyCheckout", defaultValue: false, description: "只更新工程")
+
+        gitParameter(name: "buildBranch", type: "PT_BRANCH", defaultValue: "master", branchFilter: "origin/(.*)", quickFilterEnabled: true)
+    }
+
+    environment {
+        //--------------------------------------------------------------------------------
+        // 根据配置修改
+        //--------------------------------------------------------------------------------
+
+        PROJECT_NAME = "tripeaks"
+        GIT_PATH = "ssh://ci-agent@gerrit.lexinshengwen.com:29418/${PROJECT_NAME}"
+        GIT_CERT = "ci-agent-gerrit"
+
+        UNITY_PATH = "${UNITY2021_3_21}"
+        EXECUTE_PATH = "tripeaks-unity"
+        EXECUTE_METHOD = "Build.Editor.BuildManager.BuildAuto"
+        EXPORT_PATH = "build/new"
+        CACHE_PATH = "build"
+        BUILD_JSON_PATH = "~/.${PROJECT_NAME}-cache/build-size-ios.json"
+        ADREVIEW_KEY = "iny0rUIa1b4uEq5K2eOLKffFG5AiIeJR3HTWuLV9T1oEQQoWQb89XB1wyqmNVcrevnHSwXTqTBs0_P3ae9Iygx 不同项目可能有区别，需要和产品确认"
+
+        IPA_OUTPUT_NAME = "包名最后一个单词；Unity2021 之后是产品名称删除空格"
+        EXPORT_PLIST_AD_HOC = "jenkins/plist/ad-hoc.plist"
+        EXPORT_PLIST_APP_STORE = "jenkins/plist/app-store.plist"
+        UPLOAD_TOKEN = "-u xxx@learnings.ai -p zqnq-acyo-psqt-tgfo"
+
+        ROBOT_TOKEN = "飞书机器人 ID，关键词包含'更新'和'包'"
+        CI_URL = "https://ci.lexinshengwen.com 打包机地址"
+        FIR_URL = "http://fir.lexinshengwen.com/xxxx 对应产品唯一编码"
+
+
+        //--------------------------------------------------------------------------------
+        // 固定变量
+        //--------------------------------------------------------------------------------
+
+        FIR_TOKEN = "a35bc2b89917f80c9099aeddb2a449de"
+
+        MODE = """
+            ${sh (returnStdout: true, script:
+            "if [[ ${params.isDebug} == 'true' ]]; then echo debug; else echo release; fi"
+            )}""".trim()
+
+        RELEASE_CONFIG = """
+            ${sh (returnStdout: true, script:
+            "if [[ ${params.isDebug} == 'false' || ${params.isReleaseConfig} == 'true' ]]; \
+            then echo release; else echo debug; fi"
+            )}""".trim()
+
+        ARG_MODE = """
+            ${sh (returnStdout: true, script:
+            "if [[ ${params.isDebug} == 'true' ]]; then echo Debug; else echo Release; fi"
+            )}""".trim()
+
+        TIME_TAG = """
+            ${sh (returnStdout: true, script:
+            "echo \$(date +%m%d_%H%M)"
+            )}""".trim()
+    }
+
+    stages {
+        stage("GitBranch") {
+            steps {
+                git url: "${GIT_PATH}", credentialsId: "${GIT_CERT}", branch: "${params.buildBranch}"
+            }
+        }
+
+        stage("UpdateGit") {
+            steps {
+                sh "git reset --hard"
+                sh "git clean -df"
+                sh "git submodule init"
+                sh "git submodule update"
+            }
+        }
+
+        stage("UnityPack") {
+            when {
+                expression { return params.unityPack && !params.onlyCheckout }
+            }
+            environment {
+                UNITY_LOG = "${CACHE_PATH}/build.log"
+            }
+            steps {
+                lock("UnityLock") {
+                    sh "${UNITY_PATH} -projectPath ${EXECUTE_PATH} -executeMethod ${EXECUTE_METHOD} -quit \
+                        -batchmode -buildTarget iOS -logFile ${UNITY_LOG} -appStore=${params.appStore} \
+                        -versionCode=${params.versionCode} -version=${params.version} -isDebug=${params.isDebug} \
+                        -isReleaseConfig=${params.isReleaseConfig}"
+                    sh "cat ${UNITY_LOG}"
+                }
+            }
+        }
+
+        stage("PodRepoUpdate") {
+            when {
+                expression { return params.repoUpdate && !params.onlyCheckout }
+            }
+            options {
+                retry(3)
+            }
+            steps {
+                sh """
+                pod repo update
+                """
+            }
+        }
+
+        stage("PodInstall") {
+            when {
+                expression { return params.unityPack && !params.onlyCheckout }
+            }
+            options {
+                retry(3)
+            }
+            steps {
+                sh """
+                pod install --project-directory=${EXPORT_PATH}/xcode-unity
+                cd ${EXPORT_PATH}/xcode-unity
+                ./Pods/MeeviiAds/MeeviiAdsHelper/meeviiads ad-review ${ADREVIEW_KEY}
+                """
+            }
+        }
+
+        stage("IpaNameEnv") {
+            when {
+                expression { return params.unityPack && !params.onlyCheckout }
+            }
+            steps {
+                script {
+                    IPA_NAME = readFile(file: "${EXPORT_PATH}/IpaName")
+                }
+            }
+        }
+
+        stage("Archive") {
+            when {
+                expression { return params.unityPack && !params.onlyCheckout }
+            }
+            steps {
+                sh """
+                xcodebuild archive -workspace ${EXPORT_PATH}/xcode-unity/Unity-iPhone.xcworkspace -scheme \
+                Unity-iPhone -configuration ${ARG_MODE} -archivePath ${EXPORT_PATH}/archive_current
+                mkdir ${CACHE_PATH}/${IPA_NAME}.xcarchive
+                cp -R ${EXPORT_PATH}/archive_current.xcarchive/* ${CACHE_PATH}/${IPA_NAME}.xcarchive
+                """
+            }
+        }
+
+        stage("ExportAdHoc") {
+            when {
+                expression { return params.unityPack && !params.onlyCheckout }
+            }
+            steps {
+                sh """
+                xcodebuild -exportArchive -archivePath ${EXPORT_PATH}/archive_current.xcarchive -exportPath \
+                ${EXPORT_PATH} -exportOptionsPlist ${EXPORT_PLIST_AD_HOC} -allowProvisioningUpdates YES
+                cp ${EXPORT_PATH}/${IPA_OUTPUT_NAME}.ipa ${CACHE_PATH}/${IPA_NAME}_adhoc.ipa
+                mv ${EXPORT_PATH}/${IPA_OUTPUT_NAME}.ipa ${EXPORT_PATH}/${IPA_NAME}_adhoc.ipa
+                """
+            }
+        }
+
+        stage("CompareBuildSize"){
+            when {
+                expression { return params.uploadToFir && !params.onlyCheckout }
+            }
+            environment {
+                BUILD_COMPARE_TEMP = "build-compare-temp.txt"
+            }
+            steps {
+                sh """
+                info_temp=\$(echo ${EXPORT_PATH}/BuildInfoTemp)
+                info=\$(cat \${info_temp})
+                python3 compare-size.py ${BUILD_JSON_PATH} \${info} ${EXPORT_PATH} ipa ${BUILD_COMPARE_TEMP}
+                """
+                script {
+                    COMPARE_LOG = readFile(file: "${BUILD_COMPARE_TEMP}")
+                }
+                sh "rm -r ${BUILD_COMPARE_TEMP}"
+            }
+        }
+
+        stage("UploadToFir") {
+            when {
+                expression { return params.uploadToFir && !params.onlyCheckout }
+            }
+            steps {
+                sh """
+                fir publish ${EXPORT_PATH}/${IPA_NAME}_adhoc.ipa -T ${FIR_TOKEN} -c "BRANCH: ${params.buildBranch} \
+                STORE: ${params.appStore} MODE: ${MODE} CONFIG: ${RELEASE_CONFIG} CHANGELOG: ${firChangeString}"
+                """
+            }
+            post {
+                success {
+                    sh """
+                    curl 'https://open.feishu.cn/open-apis/bot/v2/hook/${ROBOT_TOKEN}' \
+                         -X POST -H 'Content-Type: application/json' \
+                         -d '{ "msg_type": "post", "content": { "post": { "zh_cn": {
+                            "title": "${PROJECT_NAME} ${params.appStore} 更新",
+                            "content": [[
+                                { "tag": "text", "text": "下载链接：" },
+                                { "tag": "a", "text": "Jenkins", "href": "${CI_URL}" },
+                                { "tag": "text", "text": "、" },
+                                { "tag": "a", "text": "Fir", "href": "${FIR_URL}" }
+                            ],[
+                                { "tag": "text", "text": "\\n BRANCH: ${params.buildBranch}  MODE: ${MODE}  CONFIG: ${RELEASE_CONFIG}\\n" },
+                                { "tag": "text", "text": "\\n 包体对比: ${COMPARE_LOG}\\n\\n CHANGELOG: ${changeString}\\n\\n" },
+                                { "tag": "at", "user_id": "all", "user_name": "所有人" }
+                            ]]
+                         }}}}'
+                    """
+                }
+            }
+        }
+
+        stage("ExportAppStore") {
+            when {
+                expression { return params.uploadToAppStore && !params.onlyCheckout }
+            }
+            steps {
+                sh """
+                xcodebuild -exportArchive -archivePath ${EXPORT_PATH}/archive_current.xcarchive -exportPath \
+                ${EXPORT_PATH} -exportOptionsPlist ${EXPORT_PLIST_APP_STORE} -allowProvisioningUpdates YES
+                cp ${EXPORT_PATH}/${IPA_OUTPUT_NAME}.ipa ${CACHE_PATH}/${IPA_NAME}_appstore.ipa
+                mv ${EXPORT_PATH}/${IPA_OUTPUT_NAME}.ipa ${EXPORT_PATH}/${IPA_NAME}_appstore.ipa
+                """
+            }
+        }
+
+        stage("UploadToAppStore") {
+            when {
+                expression { return params.uploadToAppStore && !params.onlyCheckout }
+            }
+            options {
+                retry(3)
+            }
+            steps {
+                sh """
+                xcrun altool --upload-app -f ${EXPORT_PATH}/${IPA_NAME}_appstore.ipa -t ios ${UPLOAD_TOKEN}
+                """
+            }
+            post {
+                success {
+                    sh """
+                    curl 'https://open.feishu.cn/open-apis/bot/v2/hook/${ROBOT_TOKEN}' \
+                         -X POST -H 'Content-Type: application/json' \
+                         -d '{ "msg_type": "post", "content": { "post": { "zh_cn": {
+                            "title": "${PROJECT_NAME} ${params.appStore} 包已上传 TestFlight",
+                            "content": [[{ "tag": "at", "user_id": "all", "user_name": "所有人" }]]
+                         }}}}'
+                    """
+                }
+            }
+        }
+
+        stage("UploadSymbols") {
+            when {
+                expression { return params.uploadSymbols && params.uploadToAppStore && !params.onlyCheckout }
+            }
+            options {
+                retry(3)
+            }
+            steps {
+                sh """
+                ${EXPORT_PATH}/xcode-unity/Pods/FirebaseCrashlytics/upload-symbols -gsp \
+                ${EXPORT_PATH}/xcode-unity/GoogleService-Info.plist -p ios \
+                ${EXPORT_PATH}/archive_current.xcarchive/dSYMs
+                """
+            }
+        }
+    }
+
+    post {
+        failure {
+            script {
+                if (params.notificationOnError && !params.onlyCheckout) {
+                    sh """
+                    curl 'https://open.feishu.cn/open-apis/bot/v2/hook/${ROBOT_TOKEN}' \
+                         -X POST -H 'Content-Type: application/json' \
+                         -d '{ "msg_type": "post", "content": { "post": { "zh_cn": {
+                            "title": "${PROJECT_NAME} ${params.appStore} 打包失败",
+                            "content": [[{ "tag": "at", "user_id": "all", "user_name": "所有人" }]]
+                         }}}}'
+                    """
+                }
+            }
+        }
+    }
+}
