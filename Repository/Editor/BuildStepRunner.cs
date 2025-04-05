@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Build.Editor.Configs;
 using Build.Editor.Contexts;
 
 namespace Build.Editor
@@ -11,7 +10,7 @@ namespace Build.Editor
         {
             BuildContext context = new BuildContext();
             context.Set(BuiltinContextKey.BuildArgs, args);
-            context.Set(BuiltinContextKey.BuildConfig, BuildConfig.Get(args.AppStore));
+            args.Init();
                 
             foreach (IBuildStep step in steps)
             {

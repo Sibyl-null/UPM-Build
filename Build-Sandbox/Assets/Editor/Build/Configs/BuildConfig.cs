@@ -1,15 +1,16 @@
 ﻿using System;
+using Editor.Build.Runner;
 using UnityEditor;
 using UnityEngine;
 
-namespace Build.Editor.Configs
+namespace Editor.Build.Configs
 {
-    [CreateAssetMenu(menuName = "Meevii/BuildConfig")]
+    [CreateAssetMenu]
     public class BuildConfig : ScriptableObject
     {
         public BuildAppStore AppStore;
         public int VersionCode = 1;
-        public string Version = "0.1.0";
+        public string AppVersion = "0.1.0";
 
         public static BuildConfig Get(BuildAppStore platform)
         {

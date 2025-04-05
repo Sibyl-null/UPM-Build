@@ -1,11 +1,13 @@
 using System.IO;
 using System.Threading.Tasks;
+using Build.Editor;
 using Build.Editor.Contexts;
+using Editor.Build.Runner;
 using UnityEditor;
 
-namespace Build.Editor.Steps
+namespace Editor.Build.Steps
 {
-    public class IosPrepareStep : BaseBuildStep<BaseBuildArgs>
+    public class IosPrepareStep : BaseBuildStep<BuildArgs>
     {
         public override Task Execute()
         {
@@ -20,8 +22,8 @@ namespace Build.Editor.Steps
 
         protected virtual void PrepareSettings()
         {
-            PlayerSettings.bundleVersion = Config.Version;
-            PlayerSettings.iOS.buildNumber = Config.VersionCode.ToString();
+            PlayerSettings.bundleVersion = Args.Config.AppVersion;
+            PlayerSettings.iOS.buildNumber = Args.Config.VersionCode.ToString();
             PlayerSettings.SplashScreen.showUnityLogo = false;
         }
         

@@ -2,15 +2,17 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
+using Build.Editor;
 using Build.Editor.Contexts;
+using Editor.Build.Runner;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEditor.iOS.Xcode;
 using UnityEngine;
 
-namespace Build.Editor.Steps
+namespace Editor.Build.Steps
 {
-    public class IosPostProcessStep : BaseBuildStep<BaseBuildArgs>
+    public class IosPostProcessStep : BaseBuildStep<BuildArgs>
     {
         public override Task Execute()
         {
@@ -142,7 +144,7 @@ namespace Build.Editor.Steps
             string appName = PlayerSettings.productName.Replace(" ", "_").ToLower();
             string tag = Args.IsDebug ? "dev" : "rel";
             string time = DateTime.Now.ToString("MMdd_HHmm");
-            string ipaName = $"{appName}_{tag}_v{Config.Version}_r{Config.VersionCode}_{time}";
+            string ipaName = $"{appName}_{tag}_v{Args.Config.AppVersion}_r{Args.Config.VersionCode}_{time}";
             
             string exportPath = "../build/new";
             string ipaPath = Path.Combine(exportPath, "IpaName");
@@ -152,7 +154,7 @@ namespace Build.Editor.Steps
         private void WriteBuildInfo()
         {
             string tag = Args.IsDebug ? "dev" : "rel";
-            string infoStr = $"{Config.Version} {tag}";
+            string infoStr = $"{Args.Config.AppVersion} {tag}";
             
             string exportPath = "../build/new";
             string infoPath = Path.Combine(exportPath, "BuildInfoTemp");

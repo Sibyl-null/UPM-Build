@@ -1,12 +1,14 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Build.Editor;
 using Build.Editor.Contexts;
+using Editor.Build.Runner;
 using UnityEditor;
 
-namespace Build.Editor.Steps
+namespace Editor.Build.Steps
 {
-    public class AndroidPrepareStep : BaseBuildStep<BaseBuildArgs>
+    public class AndroidPrepareStep : BaseBuildStep<BuildArgs>
     {
         public override Task Execute()
         {
@@ -22,8 +24,8 @@ namespace Build.Editor.Steps
 
         protected virtual void PrepareSettings()
         {
-            PlayerSettings.bundleVersion = Config.Version;
-            PlayerSettings.Android.bundleVersionCode = Config.VersionCode;
+            PlayerSettings.bundleVersion = Args.Config.AppVersion;
+            PlayerSettings.Android.bundleVersionCode = Args.Config.VersionCode;
             PlayerSettings.SplashScreen.showUnityLogo = false;
             
             EditorUserBuildSettings.buildAppBundle = Args.IsAppBundle;
@@ -82,7 +84,7 @@ namespace Build.Editor.Steps
             string tag = Args.IsDebug ? "dev" : "rel";
             string time = DateTime.Now.ToString("MMdd_HHmm");
             string appStore = Args.AppStore.ToString().ToLower();
-            return $"{appName}_{tag}_v{Config.Version}_r{Config.VersionCode}_{time}_{appStore}";
+            return $"{appName}_{tag}_v{Args.Config.AppVersion}_r{Args.Config.VersionCode}_{time}_{appStore}";
         }
 
         protected virtual void OnCustomPrepare()

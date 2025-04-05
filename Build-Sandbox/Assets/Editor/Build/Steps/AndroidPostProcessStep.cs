@@ -1,10 +1,12 @@
 using System.IO;
 using System.Threading.Tasks;
+using Build.Editor;
 using Build.Editor.Contexts;
+using Editor.Build.Runner;
 
-namespace Build.Editor.Steps
+namespace Editor.Build.Steps
 {
-    public class AndroidPostProcessStep : BaseBuildStep<BaseBuildArgs>
+    public class AndroidPostProcessStep : BaseBuildStep<BuildArgs>
     {
         public override Task Execute()
         {
@@ -26,7 +28,7 @@ namespace Build.Editor.Steps
         private void WriteBuildInfo()
         {
             string tag = Args.IsDebug ? "dev" : "rel";
-            string infoStr = $"{Config.Version} {tag}";
+            string infoStr = $"{Args.Config.AppVersion} {tag}";
             
             string exportPath = "../build/new";
             string infoPath = Path.Combine(exportPath, "BuildInfoTemp");

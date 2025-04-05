@@ -1,8 +1,9 @@
-﻿using UnityEditor;
+﻿using Editor.Build.Runner;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Build.Editor.Configs
+namespace Editor.Build.Configs
 {
     [CustomEditor(typeof(BuildConfig), true)]
     public class BuildConfigEditor : UnityEditor.Editor
@@ -21,8 +22,8 @@ namespace Build.Editor.Configs
             IntegerField versionCodeField = root.Q<IntegerField>("VersionCodeField");
             versionCodeField.bindingPath = nameof(Target.VersionCode);
 
-            TextField versionField = root.Q<TextField>("VersionField");
-            versionField.bindingPath = nameof(Target.Version);
+            TextField versionField = root.Q<TextField>("AppVersionField");
+            versionField.bindingPath = nameof(Target.AppVersion);
 
             Button syncButton = root.Q<Button>("SyncButton");
             syncButton.clicked += OnSyncClick;
@@ -42,7 +43,7 @@ namespace Build.Editor.Configs
                 PlayerSettings.Android.bundleVersionCode = Target.VersionCode;
             }
 
-            PlayerSettings.bundleVersion = Target.Version;
+            PlayerSettings.bundleVersion = Target.AppVersion;
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Debug.Log("[BuildConfigEditor] Update version is success");

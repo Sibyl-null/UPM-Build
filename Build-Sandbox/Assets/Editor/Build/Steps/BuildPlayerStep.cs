@@ -1,12 +1,14 @@
 using System;
 using System.Threading.Tasks;
 using Build.Editor.Contexts;
+using Editor.Build;
+using Editor.Build.Runner;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 
 namespace Build.Editor.Steps
 {
-    public class BuildPlayerStep : BaseBuildStep<BaseBuildArgs>
+    public class BuildPlayerStep : BaseBuildStep<BuildArgs>
     {
         public override Task Execute()
         {
