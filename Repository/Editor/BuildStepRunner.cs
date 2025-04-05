@@ -6,10 +6,10 @@ namespace Build.Editor
 {
     public static class BuildStepRunner
     {
-        public static async Task Run(BaseBuildArgs args, List<IBuildStep> steps)
+        public static async Task Run(IBuildArgs args, List<IBuildStep> steps)
         {
             BuildContext context = new BuildContext();
-            context.Set(BaseBuildArgs.ContextKey, args);
+            context.Set(IBuildArgs.ContextKey, args);
             args.Init();
                 
             foreach (IBuildStep step in steps)

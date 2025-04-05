@@ -9,7 +9,7 @@ namespace Build.Editor
         Task Execute();
     }
     
-    public abstract class BaseBuildStep<TArgs> : IBuildStep where TArgs : BaseBuildArgs
+    public abstract class BaseBuildStep<TArgs> : IBuildStep where TArgs : IBuildArgs
     {
         protected TArgs Args { get; private set; }
         protected BuildContext Context { get; private set; }
@@ -17,7 +17,7 @@ namespace Build.Editor
         void IBuildStep.Init(BuildContext context)
         {
             Context = context;
-            Args = context.Get<TArgs>(BaseBuildArgs.ContextKey);
+            Args = context.Get<TArgs>(IBuildArgs.ContextKey);
         }
 
         public abstract Task Execute();

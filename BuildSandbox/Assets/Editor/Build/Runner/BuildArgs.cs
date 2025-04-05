@@ -19,8 +19,14 @@ namespace Editor.Build.Runner
         Release
     }
 
-    public class BuildArgs : BaseBuildArgs
+    public class BuildArgs : IBuildArgs
     {
+        // Unity 命令行参数
+        [Option('p')] public string ProjectPath { get; set; }
+        [Option('e')] public string ExecuteMethod { get; set; }
+        [Option('b')] public bool BatchMode { get; set; }
+        [Option('l')] public string LogFile { get; set; }
+        
         [Option(longName: "appStore", Required = true)]
         public BuildAppStore AppStore { get; set; }
         
@@ -33,7 +39,7 @@ namespace Editor.Build.Runner
         public bool IsDebug => Mode == BuildMode.Debug;
         public BuildConfig Config { get; private set; }
         
-        public override void Init()
+        public void Init()
         {
             Config = BuildConfig.Get(AppStore);
         }
