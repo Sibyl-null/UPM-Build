@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Build.Editor.Contexts;
 
 namespace Build.Editor
@@ -6,7 +5,7 @@ namespace Build.Editor
     public interface IBuildStep
     {
         void Init(BuildContext context);
-        Task Execute();
+        void Execute();
     }
     
     public abstract class BaseBuildStep<TArgs> : IBuildStep where TArgs : IBuildArgs
@@ -20,6 +19,6 @@ namespace Build.Editor
             Args = context.Get<TArgs>(IBuildArgs.ContextKey);
         }
 
-        public abstract Task Execute();
+        public abstract void Execute();
     }
 }

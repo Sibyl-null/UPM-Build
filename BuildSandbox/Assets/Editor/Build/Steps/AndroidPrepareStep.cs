@@ -1,16 +1,14 @@
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using Build.Editor;
 using Editor.Build.Runner;
 using UnityEditor;
-using UnityEngine;
 
 namespace Editor.Build.Steps
 {
     public class AndroidPrepareStep : BaseBuildStep<BuildArgs>
     {
-        public override Task Execute()
+        public override void Execute()
         {
             PrepareSettings();
             SetKeystore();
@@ -19,7 +17,6 @@ namespace Editor.Build.Steps
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            return Task.CompletedTask;
         }
 
         private void PrepareSettings()
@@ -33,8 +30,6 @@ namespace Editor.Build.Steps
                 !Args.IsDebug ? AndroidCreateSymbols.Public : AndroidCreateSymbols.Disabled;
             EditorUserBuildSettings.androidBuildSubtarget = MobileTextureSubtarget.ASTC;
             EditorUserBuildSettings.androidETC2Fallback = AndroidETC2Fallback.Quality32BitDownscaled;
-            
-            Debug.Log($"BuildAppBundle:  {EditorUserBuildSettings.buildAppBundle}");
         }
 
         private void SetKeystore()

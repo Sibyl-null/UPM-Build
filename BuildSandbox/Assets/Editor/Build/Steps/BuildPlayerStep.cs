@@ -1,7 +1,5 @@
 using System;
-using System.Threading.Tasks;
 using Build.Editor;
-using Build.Editor.Contexts;
 using Editor.Build.Runner;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
@@ -10,7 +8,7 @@ namespace Editor.Build.Steps
 {
     public class BuildPlayerStep : BaseBuildStep<BuildArgs>
     {
-        public override Task Execute()
+        public override void Execute()
         {
             string exportPath = Context.Get<string>(BuildContextKey.ExportPath);
             BuildReport buildReport = BuildPipeline.BuildPlayer(
@@ -23,7 +21,6 @@ namespace Editor.Build.Steps
                 throw new Exception("BuildPlayerStep: BuildPipeline.BuildPlayer returned null");
             
             Context.Set(BuildContextKey.BuildReport, buildReport);
-            return Task.CompletedTask;
         }
     }
 }

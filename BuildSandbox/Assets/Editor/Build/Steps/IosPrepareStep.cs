@@ -1,5 +1,4 @@
 using System.IO;
-using System.Threading.Tasks;
 using Build.Editor;
 using Editor.Build.Runner;
 using UnityEditor;
@@ -8,14 +7,13 @@ namespace Editor.Build.Steps
 {
     public class IosPrepareStep : BaseBuildStep<BuildArgs>
     {
-        public override Task Execute()
+        public override void Execute()
         {
             PrepareSettings();
             SetKeystore();
             PreparePath();
 
             AssetDatabase.SaveAssets();
-            return Task.CompletedTask;
         }
 
         private void PrepareSettings()

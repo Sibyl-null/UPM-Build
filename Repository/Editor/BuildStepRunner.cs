@@ -1,12 +1,11 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Build.Editor.Contexts;
 
 namespace Build.Editor
 {
     public static class BuildStepRunner
     {
-        public static async Task Run(IBuildArgs args, List<IBuildStep> steps)
+        public static void Run(IBuildArgs args, List<IBuildStep> steps)
         {
             BuildContext context = new BuildContext();
             context.Set(IBuildArgs.ContextKey, args);
@@ -15,7 +14,7 @@ namespace Build.Editor
             foreach (IBuildStep step in steps)
             {
                 step.Init(context);
-                await step.Execute();
+                step.Execute();
             }
         }
     }

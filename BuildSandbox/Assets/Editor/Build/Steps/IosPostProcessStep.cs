@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using System.Xml;
 using Build.Editor;
 using Editor.Build.Runner;
@@ -13,7 +12,7 @@ namespace Editor.Build.Steps
 {
     public class IosPostProcessStep : BaseBuildStep<BuildArgs>
     {
-        public override Task Execute()
+        public override void Execute()
         {
             BuildReport report = Context.Get<BuildReport>(BuildContextKey.BuildReport);
             string path = report.summary.outputPath;
@@ -25,7 +24,6 @@ namespace Editor.Build.Steps
             EnableFirebaseDebugView(path);
 
             WriteIpaName();
-            return Task.CompletedTask;
         }
         
         private void CopyPodfile(string path)
