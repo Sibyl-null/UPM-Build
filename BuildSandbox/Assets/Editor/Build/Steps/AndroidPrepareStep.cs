@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Build.Editor;
 using Editor.Build.Runner;
 using UnityEditor;
+using UnityEngine;
 
 namespace Editor.Build.Steps
 {
@@ -17,6 +18,7 @@ namespace Editor.Build.Steps
             PreparePath();
 
             AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
             return Task.CompletedTask;
         }
 
@@ -31,6 +33,8 @@ namespace Editor.Build.Steps
                 !Args.IsDebug ? AndroidCreateSymbols.Public : AndroidCreateSymbols.Disabled;
             EditorUserBuildSettings.androidBuildSubtarget = MobileTextureSubtarget.ASTC;
             EditorUserBuildSettings.androidETC2Fallback = AndroidETC2Fallback.Quality32BitDownscaled;
+            
+            Debug.Log($"BuildAppBundle:  {EditorUserBuildSettings.buildAppBundle}");
         }
 
         private void SetKeystore()
