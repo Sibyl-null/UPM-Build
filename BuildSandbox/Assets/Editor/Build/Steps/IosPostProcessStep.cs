@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Xml;
 using Build.Editor;
 using Editor.Build.Runner;
 using UnityEditor;
@@ -20,8 +19,6 @@ namespace Editor.Build.Steps
             CopyPodfile(path);
             SetXcodePBXInfo(path);
             SetTransportSecurityForEnableHttp(path);
-            SetEntitlementsForLuid(path);
-            EnableFirebaseDebugView(path);
 
             WriteIpaName();
         }
@@ -55,10 +52,7 @@ namespace Editor.Build.Steps
             pbxProject.SetBuildProperty(frameworkTarget, "ENABLE_BITCODE", "NO");
 
             // 解决 Unity2021 上传 TestFlight 失败的问题
-#if UNITY_2021_1_OR_NEWER
             pbxProject.SetBuildProperty(frameworkTarget, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
-#endif
-
             pbxProject.WriteToFile(pbxPath);
         }
 
@@ -76,61 +70,6 @@ namespace Editor.Build.Steps
             securityDict.SetBoolean("NSAllowsArbitraryLoads", true);
             
             File.WriteAllText(plistPath, plistDoc.WriteToString());
-        }
-
-        private void SetEntitlementsForLuid(string path)
-        {
-            string pbxPath = path + "/Unity-iPhone.xcodeproj/project.pbxproj";
-            string[] nameArray = PlayerSettings.applicationIdentifier.Split('.');
-            string appName = nameArray[^1];
-            string filePath = $"Unity-iPhone/{appName}.entitlements";
-            
-            ProjectCapabilityManager projCapability = new ProjectCapabilityManager(pbxPath, filePath, "Unity-iPhone");
-            projCapability.AddKeychainSharing(new[] {"$(AppIdentifierPrefix)com.learningsSharingGroup"});
-            projCapability.AddPushNotifications(true);
-            projCapability.WriteToFile();
-        }
-
-        private void EnableFirebaseDebugView(string path)
-        {
-            string schemePath = path + "/Unity-iPhone.xcodeproj/xcshareddata/xcschemes/Unity-iPhone.xcscheme";
-            XmlDocument schemeProject = new XmlDocument();
-            schemeProject.Load(schemePath);
-            
-            XmlNode launchNode = schemeProject.SelectSingleNode("Scheme/LaunchAction");
-            XmlNode commandsNode = launchNode.SelectSingleNode("CommandLineArguments");
-            if (commandsNode == null)
-            {
-                commandsNode = schemeProject.CreateElement("CommandLineArguments");
-                launchNode.AppendChild(commandsNode);
-            }
-
-            if (FirebaseDebugViewConstraint())
-            {
-                XmlElement debugElem = schemeProject.CreateElement("CommandLineArgument");
-                debugElem.SetAttribute("argument", "-FIRDebugEnabled");
-                debugElem.SetAttribute("isEnabled", "YES");
-                commandsNode.AppendChild(debugElem);
-
-                XmlElement argElem = schemeProject.CreateElement("CommandLineArgument");
-                argElem.SetAttribute("argument", "-FIRAnalyticsDebugEnabled");
-                argElem.SetAttribute("isEnabled", "YES");
-                commandsNode.AppendChild(argElem);
-            }
-            else
-            {
-                var debugElem = schemeProject.CreateElement("CommandLineArgument");
-                debugElem.SetAttribute("argument", "-FIRDebugDisabled");
-                debugElem.SetAttribute("isEnabled", "YES");
-                commandsNode.AppendChild(debugElem);
-            }
-
-            schemeProject.Save(schemePath);
-        }
-
-        private bool FirebaseDebugViewConstraint()
-        {
-            return Args.IsDebug;
         }
 
         private void WriteIpaName()
