@@ -47,7 +47,7 @@ namespace Editor.Build.Steps
             string target = pbxProject.GetUnityMainTargetGuid();
             pbxProject.SetBuildProperty(target, "DEVELOPMENT_TEAM", PlayerSettings.iOS.appleDeveloperTeamID);
 
-            // 禁用代码压缩
+            // 关闭 bitcode
             string frameworkTarget = pbxProject.GetUnityFrameworkTargetGuid();
             pbxProject.SetBuildProperty(frameworkTarget, "ENABLE_BITCODE", "NO");
 
