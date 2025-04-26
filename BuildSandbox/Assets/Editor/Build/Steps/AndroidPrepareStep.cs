@@ -28,7 +28,7 @@ namespace Editor.Build.Steps
             PlayerSettings.Android.bundleVersionCode = Args.Config.VersionCode;
             PlayerSettings.SplashScreen.showUnityLogo = false;
             
-            EditorUserBuildSettings.buildAppBundle = Args.IsAppBundle;
+            EditorUserBuildSettings.buildAppBundle = Args.IsAppBundle!.Value;
             EditorUserBuildSettings.androidCreateSymbols =
                 !Args.IsDebug ? AndroidCreateSymbols.Public : AndroidCreateSymbols.Disabled;
             EditorUserBuildSettings.androidBuildSubtarget = MobileTextureSubtarget.ASTC;
@@ -70,7 +70,7 @@ namespace Editor.Build.Steps
             exportPath = Path.Combine(exportPath, exportName);
             cachePath = Path.Combine(cachePath, exportName);
             
-            string extension = Args.IsAppBundle ? ".aab" : ".apk";
+            string extension = Args.IsAppBundle!.Value ? ".aab" : ".apk";
             exportPath += extension;
             cachePath += extension;
             

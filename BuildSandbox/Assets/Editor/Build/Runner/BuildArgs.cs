@@ -29,7 +29,7 @@ namespace Editor.Build.Runner
         public BuildMode Mode { get; set; }
 
         [Option(longName: "isAppBundle", Required = false, Default = false)]
-        public bool IsAppBundle { get; set; }
+        public bool? IsAppBundle { get; set; }
         
         public bool IsDebug => Mode == BuildMode.Debug;
         public BuildConfig Config { get; private set; }
