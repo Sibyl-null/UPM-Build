@@ -6,7 +6,7 @@ version = "2025.03"
 
 project {
     params{
-        param("UnityPath", "C:\Program Files\Unity\Hub\Editor\2022.3.24f1c1\Editor\Unity.exe")
+        param("UnityPath", "C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.24f1c1\\Editor\\Unity.exe")
         param("ProjectPath", "BuildSandbox")
     }
 
