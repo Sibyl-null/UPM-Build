@@ -17,5 +17,11 @@ changeProject(DslContext.projectId) {
         update {
             text("ProjectPath", "BuildSandbox", readOnly = true, allowEmpty = true)
         }
+        expect {
+            param("UnityPath", """C:\Program Files\Unity\Hub\Editor\2022.3.24f1c1\Editor\Unity.exe""")
+        }
+        update {
+            text("UnityPath", """C:\Program Files\Unity\Hub\Editor\2022.3.24f1c1\Editor\Unity.exe""", readOnly = true, allowEmpty = true)
+        }
     }
 }
