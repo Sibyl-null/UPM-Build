@@ -6,13 +6,8 @@ version = "2025.03"
 
 project {
     params{
-        param("UnityPath", "C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.24f1c1\\Editor\\Unity.exe",
-              specification = "display='normal' readOnly='true'"
-        )
-        
-        param("ProjectPath", "BuildSandbox",
-              specification = "display='normal' readOnly='true'"
-        )
+        param("UnityPath", "C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.24f1c1\\Editor\\Unity.exe")
+        param("ProjectPath", "BuildSandbox")
     }
 
     buildType(UpmBuild_AndroidDebug)
@@ -29,7 +24,7 @@ object UpmBuild_AndroidDebug : BuildType({
     params {
         select("Mode", "Mode", 
                 options = listOf("Debug", "Release")
-                specification = "display='prompt'"
+                display = ParameterDisplay.PROMPT
         )
     }
 
