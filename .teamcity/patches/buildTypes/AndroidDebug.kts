@@ -1,6 +1,8 @@
 package patches.buildTypes
 
 import jetbrains.buildServer.configs.kotlin.*
+import jetbrains.buildServer.configs.kotlin.buildSteps.ScriptBuildStep
+import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.ui.*
 
 /*
@@ -13,6 +15,45 @@ changeBuildType(RelativeId("AndroidDebug")) {
         add {
             select("Mode", "Mode",
                     options = listOf("Debug", "Release"))
+        }
+    }
+
+    expectSteps {
+        script {
+            name = "UnityPack"
+            id = "UnityPack"
+            scriptContent = """
+                "C:\Program Files\Unity\Hub\Editor\2022.3.24f1c1\Editor\Unity.exe" ^
+                	-projectPath "BuildSandbox" ^
+                	-executeMethod Editor.Build.Runner.BuildRunner.RunByCiCd ^
+                    -quit ^
+                	-batchmode ^
+                    -buildTarget Android ^
+                    -logFile - ^
+                    -- ^
+                    --appStore=Google ^
+                    --mode=Debug ^
+                    --isAppBundle=false
+            """.trimIndent()
+        }
+    }
+    steps {
+        update<ScriptBuildStep>(0) {
+            clearConditions()
+            scriptContent = """
+                "C:\Program Files\Unity\Hub\Editor\2022.3.24f1c1\Editor\Unity.exe" ^
+                	-projectPath "BuildSandbox" ^
+                	-executeMethod Editor.Build.Runner.BuildRunner.RunByCiCd ^
+                    -quit ^
+                	-batchmode ^
+                    -buildTarget Android ^
+                    -logFile - ^
+                    -- ^
+                    --appStore=Google ^
+                    --mode=%Mode% ^
+                    --isAppBundle=false
+            """.trimIndent()
+            param("teamcity.kubernetes.executor.pull.policy", "")
         }
     }
 }
