@@ -11,7 +11,7 @@ accordingly, and delete the patch script.
 changeBuildType(RelativeId("AndroidDebug")) {
     params {
         add {
-            select("Mode", "",
+            select("Mode", "Mode",
                     options = listOf("Debug", "Release"))
         }
     }
