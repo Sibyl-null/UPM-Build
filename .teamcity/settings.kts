@@ -33,9 +33,9 @@ object UpmBuild_AndroidDebug : BuildType({
                     -buildTarget Android ^
                     -logFile - ^
                     -- ^
-                    --appStore Google ^
-                    --mode %Mode% ^
-                    --isAppBundle false
+                    --appStore=Google ^
+                    --mode=%Mode% ^
+                    --isAppBundle=false
             """.trimIndent()
         }
     }
