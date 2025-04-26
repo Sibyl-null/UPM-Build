@@ -11,11 +11,8 @@ accordingly, and delete the patch script.
 */
 changeProject(DslContext.projectId) {
     params {
-        expect {
+        remove {
             param("ProjectPath", "BuildSandbox")
-        }
-        update {
-            param("ProjectPath", "ProjectPath")
         }
         expect {
             param("UnityPath", """C:\Program Files\Unity\Hub\Editor\2022.3.24f1c1\Editor\Unity.exe""")
