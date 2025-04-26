@@ -4,6 +4,7 @@ using Build.Editor;
 using CommandLine;
 using Editor.Build.Configs;
 using UnityEditor;
+using UnityEngine;
 
 namespace Editor.Build.Runner
 {
@@ -36,6 +37,7 @@ namespace Editor.Build.Runner
         public void Init()
         {
             Config = BuildConfig.Get(AppStore);
+            Debug.Log($"BuildArgs - AppStore: {AppStore}, Mode: {Mode}, IsAppBundle: {IsAppBundle}");
         }
 
         public string[] GetBuildScenes()
