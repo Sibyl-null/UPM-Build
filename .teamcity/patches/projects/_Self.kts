@@ -21,7 +21,7 @@ changeProject(DslContext.projectId) {
             param("UnityPath", """C:\Program Files\Unity\Hub\Editor\2022.3.24f1c1\Editor\Unity.exe""")
         }
         update {
-            text("UnityPath", "UnityPath", readOnly = true, allowEmpty = true)
+            param("UnityPath", "UnityPath")
         }
     }
 }
