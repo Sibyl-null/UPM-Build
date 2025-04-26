@@ -5,11 +5,6 @@ import jetbrains.buildServer.configs.kotlin.buildSteps.script
 version = "2025.03"
 
 project {
-    params{
-        param("UnityPath", "C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.24f1c1\\Editor\\Unity.exe")
-        param("ProjectPath", "BuildSandbox")
-    }
-
     buildType(UpmBuild_AndroidDebug)
 }
 
@@ -22,10 +17,7 @@ object UpmBuild_AndroidDebug : BuildType({
     }
     
     params {
-        select("Mode", "Mode", 
-                options = listOf("Debug", "Release")
-                display = ParameterDisplay.PROMPT
-        )
+        select("Mode", "Mode", options = listOf("Debug", "Release"))
     }
 
     steps {
@@ -33,8 +25,8 @@ object UpmBuild_AndroidDebug : BuildType({
             name = "UnityPack"
             id = "UnityPack"
             scriptContent = """
-                %{UnityPath} ^
-                	-projectPath %{ProjectPath} ^
+                "C:\Program Files\Unity\Hub\Editor\2022.3.24f1c1\Editor\Unity.exe" ^
+                	-projectPath "BuildSandbox" ^
                 	-executeMethod Editor.Build.Runner.BuildRunner.RunByCiCd ^
                     -quit ^
                 	-batchmode ^
