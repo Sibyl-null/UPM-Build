@@ -3,6 +3,7 @@ using System.IO;
 using Build.Editor;
 using Editor.Build.Runner;
 using UnityEditor;
+using UnityEngine;
 
 namespace Editor.Build.Steps
 {
@@ -17,6 +18,8 @@ namespace Editor.Build.Steps
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+            
+            Debug.Log("IsAppBundle: " + EditorUserBuildSettings.buildAppBundle);
         }
 
         private void PrepareSettings()
