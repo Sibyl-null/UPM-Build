@@ -66,7 +66,7 @@ object UpmBuild_AndroidDebug : BuildType({
             id = "PrintChangeLog"
             scriptContent = """
                 echo "Changelog:"
-                echo "%system.teamcity.build.changedFiles.file%"
+                type %system.teamcity.build.changedFiles.file%
             """.trimIndent()
         }
     }
