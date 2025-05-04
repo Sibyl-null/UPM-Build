@@ -48,6 +48,15 @@ object UpmBuild_AndroidDebug : BuildType({
                     --isAppBundle=%IsAppBundle%
             """.trimIndent()
         }
+
+        script {
+            name = "PrintChangeLog"
+            id = "PrintChangeLog"
+            scriptContent = """
+                echo "Changelog:"
+                echo "%system.teamcity.build.changedFiles.file%"
+            """.trimIndent()
+        }
     }
 
     features {
