@@ -13,15 +13,13 @@ namespace Editor.Build.Runner
 
         private BuildAppStore _appStore;
         private BuildMode _mode;
-        private bool _isAppBundle;
+        private BuildBehaviors _behaviors;
         
         private void OnGUI()
         {
             _appStore = (BuildAppStore)EditorGUILayout.EnumPopup("App Store", _appStore);
             _mode = (BuildMode)EditorGUILayout.EnumPopup("Build Mode", _mode);
-
-            if (_appStore == BuildAppStore.Google)
-                _isAppBundle = GUILayout.Toggle(_isAppBundle, "Is App Bundle");
+            _behaviors = (BuildBehaviors)EditorGUILayout.EnumPopup("Build Behaviors", _behaviors);
 
             EditorGUILayout.Space();
             if (GUILayout.Button("Build"))
@@ -30,7 +28,7 @@ namespace Editor.Build.Runner
                 {
                     AppStore = _appStore,
                     Mode = _mode,
-                    IsAppBundle = _isAppBundle
+                    Behaviors = _behaviors
                 };
                 
                 BuildRunner.RunByEditor(args);

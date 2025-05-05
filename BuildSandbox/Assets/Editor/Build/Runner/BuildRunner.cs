@@ -48,6 +48,14 @@ namespace Editor.Build.Runner
 
         private static List<IBuildStep> GetBuildSteps(BuildArgs args)
         {
+            if (args.Behaviors == BuildBehaviors.BuildBundles)
+            {
+                return new List<IBuildStep>()
+                {
+                    new BuildBundleStep()
+                };
+            }
+            
             if (args.AppStore == BuildAppStore.Google)
             {
                 return new List<IBuildStep>()

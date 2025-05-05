@@ -20,6 +20,12 @@ namespace Editor.Build.Runner
         Release
     }
 
+    public enum BuildBehaviors
+    {
+        BuildBundles,
+        BuildPlayer
+    }
+
     public class BuildArgs : IBuildArgs
     {
         [Option(longName: "appStore", Required = true)]
@@ -27,11 +33,12 @@ namespace Editor.Build.Runner
         
         [Option(longName: "mode", Required = true)]
         public BuildMode Mode { get; set; }
-
-        [Option(longName: "isAppBundle", Required = false, Default = false)]
-        public bool? IsAppBundle { get; set; }
         
+        [Option(longName: "behaviors", Required = true)]
+        public BuildBehaviors Behaviors { get; set; }
+
         public bool IsDebug => Mode == BuildMode.Debug;
+        public bool IsAppBundle => AppStore == BuildAppStore.Google && Mode == BuildMode.Release;
         public BuildConfig Config { get; private set; }
         
         public void Init()
