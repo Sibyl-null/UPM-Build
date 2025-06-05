@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "com.sibyl..build": {
-      "version": "file:D:/Studio/Unity/Packages/Unity-Build/Repository",
+      "version": "file:../../Repository",
       "depth": 0,
       "source": "local",
       "dependencies": {}
